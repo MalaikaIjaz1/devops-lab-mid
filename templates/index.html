@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assignment Submission Portal</title>
+  <style>
+    :root {
+      --brand: #0b5ed7;
+      --brand-dark: #084298;
+      --danger: #b02a37;
+      --success: #157347;
+      --ink: #1f2933;
+      --muted: #5c6b7a;
+      --line: #dde3ea;
+      --surface: #ffffff;
+      --page: #f4f6f9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      line-height: 1.55;
+    }
+    .site-header {
+      background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+      color: #fff;
+      padding: 32px 0 28px;
+    }
+    .wrap { width: min(1000px, 92%); margin: 0 auto; }
+    .site-header h1 { margin: 0 0 6px; font-size: 1.85rem; }
+    .subtitle { margin: 0; opacity: .9; font-size: .95rem; }
+    main.wrap { padding: 28px 0 48px; }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(15, 32, 56, .06);
+    }
+    .card h2 { margin: 0 0 18px; font-size: 1.2rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-weight: 600; font-size: .9rem; }
+    input[type="text"], input[type="url"] {
+      padding: 10px 12px;
+      border: 1px solid #c3ccd7;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-family: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    input:focus { outline: 2px solid rgba(11, 94, 215, .35); border-color: var(--brand); }
+    input.invalid { border-color: var(--danger); background: #fff7f7; }
+    .field-error { color: var(--danger); font-size: .82rem; margin: 0; }
+    .actions { margin-top: 20px; display: flex; gap: 12px; align-items: center; }
+    button {
+      background: var(--brand);
+      border: 0;
+      color: #fff;
+      padding: 11px 22px;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: var(--brand-dark); }
+    .hint { color: var(--muted); font-size: .82rem; margin: 12px 0 0; }
+    .alert {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      font-size: .92rem;
+    }
+    .alert ul { margin: 8px 0 0; padding-left: 20px; }
+    .alert-error { background: #fdf1f2; border-color: #f2c2c7; color: var(--danger); }
+    .alert-success { background: #effaf3; border-color: #b7e2c6; color: var(--success); }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { background: #f7f9fc; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    td a { color: var(--brand); word-break: break-all; }
+    .empty { color: var(--muted); margin: 0; }
+    .mono { font-family: Consolas, "Courier New", monospace; font-size: .85rem; }
+    footer { color: var(--muted); font-size: .82rem; padding: 0 0 32px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>Assignment Submission Portal</h1>
+      <p class="subtitle">
+        CSC418 DevOps Lab Mid Project &middot; COMSATS University Islamabad, Attock Campus
+      </p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% if errors %}
+      <div class="alert alert-error">
+        <strong>The submission was rejected. Please fix the following problems:</strong>
+        <ul>
+          {% for message in errors.values() %}<li>{{ message }}</li>{% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <section class="card">
+      <h2>Submit an assignment</h2>
+      <form method="post" action="{{ url_for('portal.submit') }}" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="student_name">Student Name</label>
+            <input type="text" id="student_name" name="student_name"
+                   value="{{ form_data.get('student_name', '') }}"
+                   class="{{ 'invalid' if errors.get('student_name') else '' }}" />
+            {% if errors.get('student_name') %}
+              <p class="field-error">{{ errors['student_name'] }}</p>
+            {% endif %}
+          </div>
+
+          <div class="field">
+            <label for="registration_number">Registration Number</label>
+            <input type="text" id="registration_number" name="registration_number"
+                   placeholder="FA22-BCS-123"
+                   value="{{ form_data.get('registration_number', '') }}"
+                   class="{{ 'invalid' if errors.get('registration_number') else '' }}" />
+            {% if errors.get('registration_number') %}
+              <p class="field-error">{{ errors['registration_number'] }}</p>
+            {% endif %}
+          </div>
+
+          <div class="field full">
+            <label for="assignment_title">Assignment Title</label>
+            <input type="text" id="assignment_title" name="assignment_title"
+                   value="{{ form_data.get('assignment_title', '') }}"
+                   class="{{ 'invalid' if errors.get('assignment_title') else '' }}" />
+            {% if errors.get('assignment_title') %}
+              <p class="field-error">{{ errors['assignment_title'] }}</p>
+            {% endif %}
+          </div>
+
+          <div class="field full">
+            <label for="submission_url">Submission URL</label>
+            <input type="url" id="submission_url" name="submission_url"
+                   placeholder="https://github.com/username/repository"
+                   value="{{ form_data.get('submission_url', '') }}"
+                   class="{{ 'invalid' if errors.get('submission_url') else '' }}" />
+            {% if errors.get('submission_url') %}
+              <p class="field-error">{{ errors['submission_url'] }}</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Save submission</button>
+        </div>
+        <p class="hint">
+          All four fields are required. The submission URL must start with
+          <span class="mono">http://</span> or <span class="mono">https://</span>.
+        </p>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Saved submissions ({{ total }})</h2>
+      {% if submissions %}
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student Name</th>
+              <th>Registration No.</th>
+              <th>Assignment Title</th>
+              <th>Submission URL</th>
+              <th>Saved At (UTC)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in submissions %}
+              <tr>
+                <td>{{ item['id'] }}</td>
+                <td>{{ item['student_name'] }}</td>
+                <td class="mono">{{ item['registration_number'] }}</td>
+                <td>{{ item['assignment_title'] }}</td>
+                <td><a href="{{ item['submission_url'] }}" target="_blank" rel="noopener noreferrer">{{ item['submission_url'] }}</a></td>
+                <td class="mono">{{ item['created_at'] }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      {% else %}
+        <p class="empty">No submissions saved yet. Fill in the form above to add the first one.</p>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer class="wrap">
+    Data is stored persistently in a local SQLite database
+    (<span class="mono">instance/submissions.db</span>).
+  </footer>
+</body>
+</html>

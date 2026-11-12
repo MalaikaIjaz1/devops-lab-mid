@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assignment Submission Portal - Static Demo</title>
+  <style>
+    :root {
+      --brand: #0b5ed7;
+      --brand-dark: #084298;
+      --danger: #b02a37;
+      --success: #157347;
+      --ink: #1f2933;
+      --muted: #5c6b7a;
+      --line: #dde3ea;
+      --surface: #ffffff;
+      --page: #f4f6f9;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--page);
+      color: var(--ink);
+      font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+      line-height: 1.55;
+    }
+    .site-header {
+      background: linear-gradient(135deg, var(--brand-dark), var(--brand));
+      color: #fff;
+      padding: 32px 0 28px;
+    }
+    .wrap { width: min(1000px, 92%); margin: 0 auto; }
+    .site-header h1 { margin: 0 0 6px; font-size: 1.85rem; }
+    .subtitle { margin: 0; opacity: .9; font-size: .95rem; }
+    .badge {
+      display: inline-block;
+      margin-top: 12px;
+      background: rgba(255, 255, 255, .18);
+      border: 1px solid rgba(255, 255, 255, .38);
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: .8rem;
+      letter-spacing: .02em;
+    }
+    main.wrap { padding: 28px 0 48px; }
+    .notice {
+      background: #fff8e6;
+      border: 1px solid #f0d999;
+      color: #6d5300;
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 22px;
+      font-size: .92rem;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(15, 32, 56, .06);
+    }
+    .card h2 { margin: 0 0 18px; font-size: 1.2rem; }
+    .card p.lead { margin: 0 0 16px; color: var(--muted); font-size: .9rem; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field.full { grid-column: 1 / -1; }
+    label { font-weight: 600; font-size: .9rem; }
+    input[type="text"], input[type="url"] {
+      padding: 10px 12px;
+      border: 1px solid #c3ccd7;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-family: inherit;
+      background: #fff;
+      color: var(--ink);
+    }
+    input:focus { outline: 2px solid rgba(11, 94, 215, .35); border-color: var(--brand); }
+    input.invalid { border-color: var(--danger); background: #fff7f7; }
+    .field-error { color: var(--danger); font-size: .82rem; margin: 0; min-height: 1em; }
+    .actions { margin-top: 18px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    button {
+      background: var(--brand);
+      border: 0;
+      color: #fff;
+      padding: 11px 22px;
+      border-radius: 6px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:hover { background: var(--brand-dark); }
+    button.secondary { background: #e9eef5; color: var(--ink); }
+    button.secondary:hover { background: #dbe3ee; }
+    .alert {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      border: 1px solid transparent;
+      font-size: .92rem;
+    }
+    .alert-error { background: #fdf1f2; border-color: #f2c2c7; color: var(--danger); }
+    .alert-success { background: #effaf3; border-color: #b7e2c6; color: var(--success); }
+    table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    th, td { text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { background: #f7f9fc; font-size: .78rem; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+    td a { color: var(--brand); word-break: break-all; }
+    .mono { font-family: Consolas, "Courier New", monospace; font-size: .85rem; }
+    .tag {
+      display: inline-block;
+      font-size: .7rem;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e9eef5;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .empty { color: var(--muted); margin: 0; }
+    footer { color: var(--muted); font-size: .82rem; padding: 0 0 32px; }
+    @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <h1>Assignment Submission Portal</h1>
+      <p class="subtitle">
+        CSC418 DevOps Lab Mid Project &middot; COMSATS University Islamabad, Attock Campus
+      </p>
+      <span class="badge">Static GitHub Pages demonstration</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="notice">
+      <strong>This page is a static demonstration.</strong>
+      It is plain HTML, CSS and JavaScript hosted on GitHub Pages. It does
+      <em>not</em> talk to the Flask backend and does not store anything on a
+      server. Submissions you add below stay in your browser tab until you
+      refresh the page. The real portal, with persistent SQLite storage and
+      server-side validation, runs locally with
+      <span class="mono">python run.py</span>.
+    </div>
+
+    <div id="message" class="alert" style="display:none"></div>
+
+    <section class="card">
+      <h2>Submit an assignment (demo)</h2>
+      <form id="demo-form" novalidate>
+        <div class="grid">
+          <div class="field">
+            <label for="student-name">Student Name</label>
+            <input type="text" id="student-name" name="studentName" autocomplete="off" />
+            <p class="field-error" data-error-for="studentName"></p>
+          </div>
+
+          <div class="field">
+            <label for="registration-number">Registration Number</label>
+            <input type="text" id="registration-number" name="registrationNumber"
+                   placeholder="FA22-BCS-123" autocomplete="off" />
+            <p class="field-error" data-error-for="registrationNumber"></p>
+          </div>
+
+          <div class="field full">
+            <label for="assignment-title">Assignment Title</label>
+            <input type="text" id="assignment-title" name="assignmentTitle" autocomplete="off" />
+            <p class="field-error" data-error-for="assignmentTitle"></p>
+          </div>
+
+          <div class="field full">
+            <label for="submission-url">Submission URL</label>
+            <input type="url" id="submission-url" name="submissionUrl"
+                   placeholder="https://github.com/username/repository" autocomplete="off" />
+            <p class="field-error" data-error-for="submissionUrl"></p>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Save submission (demo only)</button>
+          <button type="button" class="secondary" id="reset-button">Reset form</button>
+        </div>
+        <p class="field-error" style="margin-top:14px">
+          All four fields are required and the URL must start with http:// or https://.
+        </p>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>Sample submissions <span class="tag">example data</span></h2>
+      <p class="lead">
+        These rows are hard-coded examples so the demonstration looks complete.
+        They are not real submissions.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Registration No.</th>
+            <th>Assignment Title</th>
+            <th>Submission URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Ayesha Khan</td>
+            <td class="mono">FA22-BCS-123</td>
+            <td>DevOps Lab Mid Project</td>
+            <td><a href="https://github.com/ayesha-khan/devops-lab-mid" target="_blank" rel="noopener noreferrer">https://github.com/ayesha-khan/devops-lab-mid</a></td>
+          </tr>
+          <tr>
+            <td>Bilal Ahmed</td>
+            <td class="mono">FA22-BCS-087</td>
+            <td>CI/CD Pipeline Assignment</td>
+            <td><a href="https://github.com/bilal-ahmed/cicd-pipeline" target="_blank" rel="noopener noreferrer">https://github.com/bilal-ahmed/cicd-pipeline</a></td>
+          </tr>
+          <tr>
+            <td>Hina Rauf</td>
+            <td class="mono">SP23-BCS-204</td>
+            <td>Automated Testing Report</td>
+            <td><a href="https://github.com/hina-rauf/testing-report" target="_blank" rel="noopener noreferrer">https://github.com/hina-rauf/testing-report</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>Submissions added on this page <span class="tag">session only</span></h2>
+      <p class="lead">
+        Anything you submit below is validated in the browser and kept in memory
+        only, then discarded when the page is reloaded.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Student Name</th>
+            <th>Registration No.</th>
+            <th>Assignment Title</th>
+            <th>Submission URL</th>
+          </tr>
+        </thead>
+        <tbody id="demo-rows">
+          <tr><td colspan="4" class="empty">No demo submissions added yet.</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    Static demo deployed from the <span class="mono">docs/</span> folder after the
+    automated tests pass on the <span class="mono">main</span> branch.
+  </footer>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var form = document.getElementById("demo-form");
+      var rowsBody = document.getElementById("demo-rows");
+      var messageBox = document.getElementById("message");
+      var demoSubmissions = [];
+
+      function clearErrors() {
+        document.querySelectorAll("[data-error-for]").forEach(function (element) {
+          element.textContent = "";
+        });
+        form.querySelectorAll("input").forEach(function (input) {
+          input.classList.remove("invalid");
+        });
+      }
+
+      function showError(fieldName, message) {
+        var errorElement = document.querySelector('[data-error-for="' + fieldName + '"]');
+        if (errorElement) {
+          errorElement.textContent = message;
+        }
+        var input = form.elements[fieldName];
+        if (input) {
+          input.classList.add("invalid");
+        }
+      }
+
+      function showMessage(text, kind) {
+        messageBox.textContent = text;
+        messageBox.className = "alert alert-" + kind;
+        messageBox.style.display = "block";
+      }
+
+      function hideMessage() {
+        messageBox.style.display = "none";
+      }
+
+      function isValidUrl(value) {
+        if (!value || /\s/.test(value)) {
+          return false;
+        }
+        try {
+          var parsed = new URL(value);
+          if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+            return false;
+          }
+          return (parsed.hostname || "").indexOf(".") !== -1 ||
+                 parsed.hostname === "localhost";
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function validate(values) {
+        var errors = {};
+
+        if (!values.studentName) {
+          errors.studentName = "Student name is required.";
+        } else if (values.studentName.length < 3) {
+          errors.studentName = "Student name must be at least 3 characters long.";
+        }
+
+        if (!values.registrationNumber) {
+          errors.registrationNumber = "Registration number is required.";
+        } else if (values.registrationNumber.length < 3) {
+          errors.registrationNumber = "Registration number must be at least 3 characters long.";
+        }
+
+        if (!values.assignmentTitle) {
+          errors.assignmentTitle = "Assignment title is required.";
+        }
+
+        if (!values.submissionUrl) {
+          errors.submissionUrl = "Submission URL is required.";
+        } else if (!isValidUrl(values.submissionUrl)) {
+          errors.submissionUrl =
+            "Submission URL must be a valid http:// or https:// link, " +
+            "for example https://github.com/username/repository";
+        }
+
+        return errors;
+      }
+
+      function renderRows() {
+        if (demoSubmissions.length === 0) {
+          rowsBody.innerHTML =
+            '<tr><td colspan="4" class="empty">No demo submissions added yet.</td></tr>';
+          return;
+        }
+
+        rowsBody.innerHTML = "";
+        demoSubmissions.forEach(function (item) {
+          var row = document.createElement("tr");
+          [item.studentName, item.registrationNumber, item.assignmentTitle].forEach(
+            function (value) {
+              var cell = document.createElement("td");
+              cell.textContent = value;
+              row.appendChild(cell);
+            }
+          );
+
+          var urlCell = document.createElement("td");
+          var link = document.createElement("a");
+          link.href = item.submissionUrl;
+          link.textContent = item.submissionUrl;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          urlCell.appendChild(link);
+          row.appendChild(urlCell);
+
+          rowsBody.appendChild(row);
+        });
+      }
+
+      function collectValues() {
+        return {
+          studentName: (form.elements.studentName.value || "").trim(),
+          registrationNumber: (form.elements.registrationNumber.value || "").trim(),
+          assignmentTitle: (form.elements.assignmentTitle.value || "").trim(),
+          submissionUrl: (form.elements.submissionUrl.value || "").trim()
+        };
+      }
+
+      form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        clearErrors();
+        hideMessage();
+
+        var values = collectValues();
+        var errors = validate(values);
+        var fieldNames = Object.keys(errors);
+
+        if (fieldNames.length > 0) {
+          fieldNames.forEach(function (fieldName) {
+            showError(fieldName, errors[fieldName]);
+          });
+          showMessage(
+            "The submission was rejected. Please fix the highlighted fields.",
+            "error"
+          );
+          return;
+        }
+
+        demoSubmissions.unshift(values);
+        renderRows();
+        form.reset();
+        showMessage(
+          "Accepted by the browser demo. Nothing was saved on a server - " +
+          "use the Flask app for real persistent storage.",
+          "success"
+        );
+      });
+
+      document.getElementById("reset-button").addEventListener("click", function () {
+        form.reset();
+        clearErrors();
+        hideMessage();
+      });
+
+      renderRows();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+name: CI - Test, Email Report, Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: read the code, publish Pages, and mint the Pages OIDC token.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+env:
+  RECEIVER_URL: http://127.0.0.1:5001/report
+  RECEIVER_HEALTH_URL: http://127.0.0.1:5001/health
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # JOB 1 - run the automated tests and deliver the real JSON report
+  # ---------------------------------------------------------------------------
+  test:
+    name: Run pytest and deliver JSON report
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Verify Python
+        shell: powershell
+        run: |
+          python --version
+          python -c "import sys; print('Python executable:', sys.executable)"
+
+      - name: Install dependencies
+        shell: powershell
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Make sure the local report receiver is running
+        shell: powershell
+        run: |
+          $healthy = $false
+          try {
+            $response = Invoke-RestMethod -Uri "$env:RECEIVER_HEALTH_URL" -TimeoutSec 5
+            if ($response.status -eq "ok") { $healthy = $true }
+          }
+          catch { $healthy = $false }
+
+          if (-not $healthy) {
+            Write-Host "Receiver is not running. Starting receiver/server.py in the background..."
+            Start-Process -FilePath "python" `
+              -ArgumentList "receiver/server.py" `
+              -WorkingDirectory "${{ github.workspace }}" `
+              -WindowStyle Hidden
+
+            for ($attempt = 1; $attempt -le 20; $attempt++) {
+              Start-Sleep -Seconds 1
+              try {
+                $response = Invoke-RestMethod -Uri "$env:RECEIVER_HEALTH_URL" -TimeoutSec 3
+                if ($response.status -eq "ok") { $healthy = $true; break }
+              }
+              catch { }
+            }
+          }
+
+          if (-not $healthy) {
+            throw "The local report receiver is not reachable at $env:RECEIVER_HEALTH_URL."
+          }
+
+          Write-Host "Report receiver is ready at $env:RECEIVER_HEALTH_URL"
+
+      - name: Run tests and deliver JSON report
+        shell: powershell
+        run: python scripts/run_tests.py --require-receiver
+
+      - name: Show the generated report
+        if: always()
+        shell: powershell
+        run: |
+          if (Test-Path "test-report.json") {
+            Get-Content "test-report.json"
+          }
+          else {
+            Write-Host "test-report.json was not generated."
+          }
+
+      # if: always() is required so the artifact is uploaded for failing runs too.
+      - name: Upload test report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report
+          path: test-report.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  # ---------------------------------------------------------------------------
+  # JOB 2 - email the report after a passing OR failing test run
+  # ---------------------------------------------------------------------------
+  email-report:
+    name: Email the test report
+    needs: test
+    # Runs after success or failure, but never after a cancellation.
+    if: ${{ !cancelled() && needs.test.result != 'cancelled' }}
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Download the test report artifact from the test job
+        uses: actions/download-artifact@v4
+        with:
+          name: test-report
+          path: .
+
+      - name: Send the email report
+        shell: powershell
+        run: python scripts/send_email_report.py --report test-report.json
+        env:
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_TO: ${{ secrets.MAIL_TO }}
+
+  # ---------------------------------------------------------------------------
+  # JOB 3 - deploy docs/ to GitHub Pages, only after green tests on main
+  # ---------------------------------------------------------------------------
+  deploy:
+    name: Deploy static demo to GitHub Pages
+    needs: test
+    # The email job is intentionally NOT a dependency, so a mail problem can
+    # never block the deployment.
+    if: ${{ needs.test.result == 'success' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the docs folder as a Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
