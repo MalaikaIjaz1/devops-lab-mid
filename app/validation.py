@@ -45,17 +45,21 @@ def validate_submission(form):
     errors = {}
 
     for field, label in FIELD_LABELS.items():
+        if field == "registration_number":
+            continue  # DELIBERATE DEFECT: registration number is no longer required
         if not cleaned[field]:
             errors[field] = f"{label} is required."
 
     if not errors.get("student_name") and len(cleaned["student_name"]) < 3:
         errors["student_name"] = "Student name must be at least 3 characters long."
 
-    if not errors.get("registration_number"):
-        if len(cleaned["registration_number"]) < 3:
-            errors["registration_number"] = (
-                "Registration number must be at least 3 characters long."
-            )
+    # DELIBERATE DEFECT: the minimum-length check for the registration number is
+    # disabled so an empty value passes validation entirely.
+    # if not errors.get("registration_number"):
+    #     if len(cleaned["registration_number"]) < 3:
+    #         errors["registration_number"] = (
+    #             "Registration number must be at least 3 characters long."
+    #         )
 
     if not errors.get("submission_url") and not is_valid_url(
         cleaned["submission_url"]
