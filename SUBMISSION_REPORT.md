@@ -58,7 +58,7 @@ Around the application sits a complete CI/CD demonstration:
 | `app/validation.py` | Required-field checks and URL validation |
 | `templates/index.html` | Portal UI with inline error messages and submissions table |
 | `tests/conftest.py` | Temporary database and Flask test-client fixtures |
-| `tests/test_submissions.py` | 7 pytest tests |
+| `tests/test_submissions.py` | 3 pytest tests (the required test cases) |
 | `receiver/server.py` | Local report receiver (`POST /report`, `GET /health`, `GET /report`) |
 | `scripts/run_tests.py` | Runs pytest → JUnit XML → `test-report.json` → POST to receiver |
 | `scripts/send_email_report.py` | Emails the real report (SMTP 587 STARTTLS / 465 SSL) |
@@ -171,16 +171,15 @@ database stays empty.
 
 **Expected:** HTTP 400, a “Submission URL must be a valid …” message, and no database row.
 
-### Additional tests
+### Test summary
 
-| Test | Purpose |
-|---|---|
-| `test_submission_without_student_name_is_rejected` | Blank/whitespace names are trimmed and rejected |
-| `test_submission_url_must_use_http_or_https` | `www.github.com/...` (no scheme) is rejected |
-| `test_saved_submissions_survive_a_new_request` | The list is rendered again on the next request |
-| `test_empty_portal_lists_no_submissions` | The empty state renders correctly |
+| Test case | Expected result | Test function |
+|---|---|---|
+| Complete details and a valid submission URL | The submission is saved and appears in the submission list | `test_valid_submission_is_saved_and_displayed` |
+| Missing registration number | The submission is rejected with a validation message | `test_submission_without_registration_number_is_rejected` |
+| Invalid submission URL | The submission is rejected and is not saved | `test_submission_with_invalid_url_is_rejected` |
 
-Local result at the time of writing: **7 passed**.
+Local result: **3 passed**.
 
 ---
 
@@ -245,8 +244,8 @@ The full beginner-level version of every step is in `SETUP_GUIDE.md`.
 git push origin main
 ```
 
-Expected: `test` ✅ (7 passed) → `email-report` ✅ → `deploy` ✅.
-Receiver prints `PASSED | 7/7 passed`; `test-report.json` shows `"overall_status": "passed"`.
+Expected: `test` ✅ (3 passed) → `email-report` ✅ → `deploy` ✅.
+Receiver prints `PASSED | 3/3 passed`; `test-report.json` shows `"overall_status": "passed"`.
 
 ### Phase 2 — introduce the defect
 
@@ -274,7 +273,7 @@ git push origin main
 
 Expected: `test` ❌ (`test_submission_without_registration_number_is_rejected` fails),
 artifact uploaded anyway, `email-report` ✅ with a `[FAILED]` email, `deploy` ⏭️ skipped.
-Receiver prints `FAILED | 6/7 passed`; the report contains the failure message.
+Receiver prints `FAILED | 2/3 passed`; the report contains the failure message.
 
 ### Phase 4 — fix
 
@@ -306,7 +305,7 @@ your own run.
 | 1 | Portal page with the form and a saved submission | Screenshot `http://127.0.0.1:5000` after a valid submission | ☐ |
 | 2 | Rejection of a missing registration number | Screenshot of the red “Registration number is required.” message | ☐ |
 | 3 | Rejection of an invalid URL | Screenshot of the URL validation message | ☐ |
-| 4 | Local pytest output (7 passed) | Screenshot of `python -m pytest -v` | ☐ |
+| 4 | Local pytest output (3 passed) | Screenshot of `python -m pytest -v` | ☐ |
 | 5 | Receiver console showing a received report | Screenshot of the `[receiver] ... PASSED` line | ☐ |
 | 6 | Passing `test-report.json` | Copy/screenshot of the file, or the uploaded artifact | ☐ |
 | 7 | Failing `test-report.json` (with failure message) | Copy/screenshot taken right after the deliberate-defect run | ☐ |

@@ -1,9 +1,13 @@
 """Automated tests for the Assignment Submission Portal.
 
-These cover the three required scenarios:
-  1. a complete, valid submission is saved and displayed,
-  2. a submission without a registration number is rejected and not saved,
-  3. a submission with an invalid URL is rejected and not saved.
+The suite contains exactly the three test cases required by the assignment:
+
+  1. Complete details and a valid submission URL
+     -> the submission is saved and appears in the submission list.
+  2. Missing registration number
+     -> the submission is rejected with a validation message.
+  3. Invalid submission URL
+     -> the submission is rejected and is not saved.
 """
 
 from app import storage
@@ -23,27 +27,39 @@ def saved_rows(app):
 
 
 def test_valid_submission_is_saved_and_displayed(client, app):
-    """Test 1: a complete and valid submission is saved and displayed."""
+    """Test 1: complete details and a valid submission URL.
+
+    Expected result: the submission is saved and appears in the submission list.
+    """
     response = client.post(
         "/submit", data=VALID_SUBMISSION, follow_redirects=True
     )
     body = response.get_data(as_text=True)
 
+    # The page comes back normally after the redirect.
     assert response.status_code == 200
     assert "Submission saved successfully." in body
+
+    # It is rendered in the submission list.
     assert VALID_SUBMISSION["student_name"] in body
     assert VALID_SUBMISSION["registration_number"] in body
     assert VALID_SUBMISSION["assignment_title"] in body
     assert VALID_SUBMISSION["submission_url"] in body
+    assert "Saved submissions (1)" in body
 
+    # It really exists in the persistent store.
     rows = saved_rows(app)
     assert len(rows) == 1
+    assert rows[0]["student_name"] == VALID_SUBMISSION["student_name"]
     assert rows[0]["registration_number"] == VALID_SUBMISSION["registration_number"]
     assert rows[0]["submission_url"] == VALID_SUBMISSION["submission_url"]
 
 
 def test_submission_without_registration_number_is_rejected(client, app):
-    """Test 2: a missing registration number is rejected and nothing is saved."""
+    """Test 2: missing registration number.
+
+    Expected result: the submission is rejected with a validation message.
+    """
     data = dict(VALID_SUBMISSION)
     data.pop("registration_number")
 
@@ -56,7 +72,10 @@ def test_submission_without_registration_number_is_rejected(client, app):
 
 
 def test_submission_with_invalid_url_is_rejected(client, app):
-    """Test 3: an invalid submission URL is rejected and nothing is saved."""
+    """Test 3: invalid submission URL.
+
+    Expected result: the submission is rejected and is not saved.
+    """
     data = dict(VALID_SUBMISSION, submission_url="this-is-not-a-url")
 
     response = client.post("/submit", data=data)
@@ -65,46 +84,3 @@ def test_submission_with_invalid_url_is_rejected(client, app):
     assert response.status_code == 400
     assert "Submission URL must be a valid" in body
     assert saved_rows(app) == []
-
-
-def test_submission_without_student_name_is_rejected(client, app):
-    """A missing student name is rejected with a clear message."""
-    data = dict(VALID_SUBMISSION, student_name="   ")
-
-    response = client.post("/submit", data=data)
-    body = response.get_data(as_text=True)
-
-    assert response.status_code == 400
-    assert "Student name is required." in body
-    assert saved_rows(app) == []
-
-
-def test_submission_url_must_use_http_or_https(client, app):
-    """A URL without an http(s) scheme is rejected."""
-    data = dict(VALID_SUBMISSION, submission_url="www.github.com/ayesha")
-
-    response = client.post("/submit", data=data)
-
-    assert response.status_code == 400
-    assert saved_rows(app) == []
-
-
-def test_saved_submissions_survive_a_new_request(client):
-    """Saved submissions are displayed again on the next page load."""
-    client.post("/submit", data=VALID_SUBMISSION)
-
-    response = client.get("/")
-    body = response.get_data(as_text=True)
-
-    assert response.status_code == 200
-    assert VALID_SUBMISSION["registration_number"] in body
-    assert "Saved submissions (1)" in body
-
-
-def test_empty_portal_lists_no_submissions(client):
-    """The portal page renders correctly before any submission exists."""
-    response = client.get("/")
-    body = response.get_data(as_text=True)
-
-    assert response.status_code == 200
-    assert "No submissions saved yet." in body

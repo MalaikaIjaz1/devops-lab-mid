@@ -73,7 +73,7 @@ your PC. A self-hosted runner runs on your computer, so `127.0.0.1:5001` is your
 - Clear, per-field validation messages; invalid submissions return HTTP 400 and are never saved.
 - Persistent storage in SQLite (`instance/submissions.db`) that survives restarts.
 - A table listing every saved submission.
-- Seven pytest tests, including the three required scenarios.
+- Three pytest tests, exactly matching the assignment's three required test cases.
 - Local HTTP report receiver on `127.0.0.1:5001` with `POST /report`.
 - Real `test-report.json` (repository, branch, commit SHA, run ID, timestamp, per-test results,
   failure messages, totals, overall status) — never hand-written.
@@ -125,7 +125,7 @@ Lab Mid/
 │   └── index.html           # Portal page: form, errors, saved submissions table
 ├── tests/
 │   ├── conftest.py          # Temporary database + Flask test client fixtures
-│   └── test_submissions.py  # 7 tests (includes the 3 required ones)
+│   └── test_submissions.py  # the 3 required tests
 ├── receiver/
 │   └── server.py            # Local HTTP receiver (127.0.0.1:5001, POST /report)
 ├── scripts/
@@ -323,7 +323,7 @@ Invoke-RestMethod -Uri http://127.0.0.1:5001/report
 Now, in another window, run `python scripts/run_tests.py`. The receiver prints a line such as:
 
 ```
-[receiver] 2026-11-11T10:15:03Z | your-name/devops-lab-mid | main | run 1234567890 | PASSED | 7/7 passed
+[receiver] 2026-11-11T10:15:03Z | your-name/devops-lab-mid | main | run 1234567890 | PASSED | 3/3 passed
 ```
 
 and `test-report.json` appears in the project root.
@@ -552,8 +552,8 @@ git push origin main
 
 Watch **Actions → CI - Test, Email Report, Deploy**.
 
-- `Run pytest and deliver JSON report` → **success** (7 tests).
-- Receiver console prints `PASSED | 7/7 passed`.
+- `Run pytest and deliver JSON report` → **success** (3 tests).
+- Receiver console prints `PASSED | 3/3 passed`.
 - `Email the test report` → **success**, email arrives with the JSON attached.
 - `Deploy static demo to GitHub Pages` → **success**, site published.
 
@@ -586,7 +586,7 @@ git push origin main
 ### Phase 3 — red run
 
 - `Run pytest and deliver JSON report` → **failure** (`test_submission_without_registration_number_is_rejected`).
-- Receiver console prints `FAILED | 6/7 passed` and `test-report.json` now contains the failure
+- Receiver console prints `FAILED | 2/3 passed` and `test-report.json` now contains the failure
   message.
 - `Email the test report` → **success**, email subject starts with `[FAILED]`.
 - `Deploy static demo to GitHub Pages` → **skipped**, so the previous site is still online.
@@ -608,7 +608,7 @@ git push origin main
 
 ### Phase 5 — green run again
 
-- 7/7 tests pass, report shows `PASSED`, a green email arrives, and Pages deploys again.
+- 3/3 tests pass, report shows `PASSED`, a green email arrives, and Pages deploys again.
 
 **Never leave the defect in the final code.** Confirm with:
 

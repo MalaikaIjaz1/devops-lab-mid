@@ -150,7 +150,7 @@ cd "D:\Uni\Semester 08\DevOps\Lab Mid"
 python -m pytest -v
 ```
 
-Expected result: **7 passed**.
+Expected result: **3 passed**.
 
 Then run the reporting version (it writes `test-report.json`):
 
@@ -351,11 +351,11 @@ Expected:
 
 | Job | Result |
 |---|---|
-| Run pytest and deliver JSON report | ✅ success, 7 tests |
+| Run pytest and deliver JSON report | ✅ success, 3 tests |
 | Email the test report | ✅ success |
 | Deploy static demo to GitHub Pages | ✅ success |
 
-In the receiver window you should see `PASSED | 7/7 passed`.
+In the receiver window you should see `PASSED | 3/3 passed`.
 Download the artifact `test-report` from the run summary if you want extra evidence.
 
 ---
@@ -406,7 +406,7 @@ Expected in the new run:
 | Email the test report | ✅ success, subject starts with `[FAILED]` |
 | Deploy static demo to GitHub Pages | ⏭️ skipped — the old site stays online |
 
-The receiver prints `FAILED | 6/7 passed`.
+The receiver prints `FAILED | 2/3 passed`.
 
 Screenshots to take now: the red job, the receiver console, the `[FAILED]` email, the skipped
 deploy job.
@@ -441,7 +441,7 @@ git push origin main
 ```
 
 Expected: a third run where all three jobs are green again, and the receiver prints
-`PASSED | 7/7 passed`.
+`PASSED | 3/3 passed`.
 
 **Confirm the final code has no defect:**
 
@@ -496,7 +496,7 @@ Check the GitHub run ID matches the workflow run page URL (`.../actions/runs/<ru
 1. Open your inbox.
 2. You should have **two** emails from `MAIL_FROM`:
    - `[FAILED] Test report - <repo> (main)` — lists the failing test and its message,
-   - `[PASSED] Test report - <repo> (main)` — lists all seven tests as passed.
+   - `[PASSED] Test report - <repo> (main)` — lists all three tests as passed.
 3. Each email must contain repository, branch, commit SHA, run ID, overall status, totals and the
    per-test table.
 4. Each email must have `test-report.json` attached.
